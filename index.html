@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Master — Tables, Squares & Cubes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#faf7f2;
+  --ink:#1a1510;
+  --surface:#ffffff;
+  --surface2:#f2ede6;
+  --border:#e0d8cc;
+  --muted:#8a7e6e;
+  --accent:#c94a1a;
+  --accent2:#2a6db5;
+  --accent3:#1a8a4a;
+  --correct:#1a8a4a;
+  --correct-bg:#eaf7ee;
+  --wrong:#c94a1a;
+  --wrong-bg:#fdf0ec;
+  --mono:'DM Mono',monospace;
+  --display:'Playfair Display',serif;
+  --body:'DM Sans',sans-serif;
+  --radius:10px;
+}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--body);min-height:100vh;padding:0 0 4rem}
+
+/* HEADER */
+.site-header{
+  background:var(--ink);color:var(--bg);
+  padding:1.25rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:2rem;
+}
+.site-title{font-family:var(--display);font-size:1.5rem;letter-spacing:-0.01em}
+.site-title span{color:#f0c060}
+.site-subtitle{font-family:var(--mono);font-size:10px;color:#9a8e7e;letter-spacing:0.15em;text-transform:uppercase;margin-top:2px}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin:0 2rem 2rem;overflow-x:auto}
+.nav-tab{
+  padding:0.75rem 1.5rem;
+  font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;
+  background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;
+  color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.2s;
+}
+.nav-tab:hover{color:var(--ink)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+
+/* SECTIONS */
+.section{display:none;padding:0 2rem}
+.section.active{display:block}
+
+/* SCORE BAR */
+.score-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.75rem}
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;text-align:center}
+.score-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
+.score-val{font-size:28px;font-weight:700;font-family:var(--display)}
+
+/* TABLE SELECTOR */
+.config-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem}
+.config-title{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.85rem}
+.table-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.chip{
+  width:42px;height:42px;border-radius:8px;
+  border:1.5px solid var(--border);background:var(--bg);
+  font-family:var(--mono);font-size:14px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip-actions{display:flex;gap:8px}
+.chip-btn{
+  padding:6px 14px;border:1px solid var(--border);border-radius:99px;
+  font-family:var(--mono);font-size:11px;background:var(--bg);color:var(--muted);cursor:pointer;
+  transition:all 0.15s;
+}
+.chip-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* MULTIPLIER ROW */
+.multiplier-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.mult-label{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em}
+.mult-chips{display:flex;flex-wrap:wrap;gap:6px}
+.mult-chip{
+  width:36px;height:36px;border-radius:6px;
+  border:1.5px solid var(--border);background:var(--bg);
+  font-family:var(--mono);font-size:12px;font-weight:500;
+  color:var(--muted);cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.mult-chip:hover{border-color:var(--accent2);color:var(--accent2)}
+.mult-chip.selected{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+/* START BTN */
+.start-btn{
+  width:100%;padding:13px;border:none;border-radius:var(--radius);
+  background:var(--ink);color:var(--bg);
+  font-family:var(--display);font-size:16px;cursor:pointer;
+  transition:all 0.15s;margin-bottom:1.5rem;letter-spacing:0.01em;
+}
+.start-btn:hover{background:var(--accent)}
+
+/* QUESTION CARD */
+.question-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:2.5rem 2rem;text-align:center;margin-bottom:1.25rem;
+  position:relative;overflow:hidden;
+}
+.question-card::after{
+  content:attr(data-num);
+  position:absolute;right:-10px;top:-10px;
+  font-family:var(--display);font-size:120px;font-weight:900;
+  color:var(--border);line-height:1;pointer-events:none;
+  opacity:0.6;
+}
+.q-eyebrow{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.85rem}
+.q-main{font-family:var(--display);font-size:60px;font-weight:900;line-height:1;margin-bottom:0.5rem;color:var(--ink)}
+.q-hint{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* OPTIONS */
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.opt-btn{
+  padding:14px;border:1.5px solid var(--border);border-radius:var(--radius);
+  font-family:var(--mono);font-size:18px;font-weight:500;
+  background:var(--surface);color:var(--ink);cursor:pointer;transition:all 0.15s;
+  line-height:1.3;
+}
+.opt-btn.pair-opt{font-size:15px;padding:12px 8px;}
+.opt-btn:hover:not(:disabled){background:var(--surface2);border-color:var(--ink);transform:translateY(-1px)}
+.opt-btn:disabled{cursor:default}
+.opt-btn.correct{background:var(--correct-bg);border-color:var(--correct);color:var(--correct)}
+.opt-btn.wrong{background:var(--wrong-bg);border-color:var(--wrong);color:var(--wrong)}
+
+/* FEEDBACK */
+.feedback{text-align:center;font-family:var(--mono);font-size:13px;min-height:22px;margin-bottom:0.85rem}
+.feedback.ok{color:var(--correct)}
+.feedback.bad{color:var(--wrong)}
+
+/* NEXT BTN */
+.next-btn{
+  width:100%;padding:13px;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--surface2);color:var(--ink);
+  font-family:var(--body);font-size:15px;font-weight:600;cursor:pointer;
+  display:none;transition:all 0.15s;
+}
+.next-btn:hover{background:var(--ink);color:var(--bg)}
+
+/* REFERENCE TABLE */
+.ref-section{margin-top:2rem}
+.ref-toggle-btn{
+  width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--surface);font-family:var(--mono);font-size:11px;color:var(--muted);
+  letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;margin-bottom:0;
+}
+.ref-toggle-btn:hover{color:var(--ink)}
+.ref-content{display:none;margin-top:0.5rem}
+.ref-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+.ref-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.ref-table th{background:var(--surface2);padding:8px 10px;color:var(--muted);font-weight:500;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ref-table td{padding:7px 10px;text-align:center;border-top:1px solid var(--border)}
+.ref-table td:first-child{font-weight:500;color:var(--accent)}
+.ref-table tr:nth-child(even) td{background:var(--bg)}
+
+/* REFERENCE TABLE for tables section */
+.multi-ref{display:flex;gap:12px;flex-wrap:wrap;margin-top:0.5rem}
+.mini-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;flex:1;min-width:160px}
+.mini-table-title{background:var(--ink);color:var(--bg);font-family:var(--display);font-size:15px;padding:6px 10px;text-align:center}
+.mini-table table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.mini-table td{padding:5px 8px;border-top:1px solid var(--border);text-align:center}
+.mini-table td:first-child{color:var(--muted)}
+.mini-table td:last-child{font-weight:500}
+.mini-table tr:nth-child(even) td{background:var(--bg)}
+
+/* MODE pills for powers */
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+.pill{
+  padding:7px 16px;border-radius:99px;border:1.5px solid var(--border);
+  font-family:var(--mono);font-size:11px;letter-spacing:0.05em;
+  background:var(--bg);color:var(--muted);cursor:pointer;transition:all 0.15s;
+}
+.pill:hover{border-color:var(--accent3);color:var(--accent3)}
+.pill.active{background:var(--accent3);border-color:var(--accent3);color:#fff;font-weight:500}
+
+/* RANGE SELECTOR */
+.range-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:1rem}
+.range-label{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;white-space:nowrap}
+.range-input{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;color:var(--ink)}
+.range-input input[type=number]{
+  width:58px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;
+  font-family:var(--mono);font-size:13px;background:var(--bg);color:var(--ink);text-align:center;
+}
+.range-input input[type=number]:focus{outline:none;border-color:var(--accent3)}
+
+/* tip box */
+.tip-box{
+  background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:8px;padding:0.85rem 1rem;margin-top:1.5rem;
+  font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.75;
+}
+.tip-box strong{color:var(--ink)}
+
+/* QUIZ NOT STARTED OVERLAY */
+.not-started{
+  text-align:center;padding:3rem 1rem;
+  font-family:var(--mono);font-size:13px;color:var(--muted);
+  border:1.5px dashed var(--border);border-radius:16px;
+}
+
+/* animation */
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+.pop{animation:pop 0.25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.slide-in{animation:slideIn 0.3s ease both}
+
+/* TIMER */
+.timer-config{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem}
+.timer-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--muted);user-select:none}
+.timer-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.timer-sec-wrap{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.timer-sec-wrap input{width:56px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;
+  font-family:var(--mono);font-size:13px;background:var(--bg);color:var(--ink);text-align:center}
+.timer-sec-wrap input:focus{outline:none;border-color:var(--accent)}
+.timer-bar-wrap{margin-bottom:1rem}
+.timer-bar-track{height:7px;background:var(--border);border-radius:99px;overflow:hidden}
+.timer-bar-fill{height:100%;background:var(--accent3);border-radius:99px;transition:background 0.3s}
+.timer-label{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+.timer-label span{font-weight:700;color:var(--ink)}
+.results-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center}
+.results-title{font-family:var(--display);font-size:28px;font-weight:900;margin-bottom:0.5rem}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.25rem 0}
+.results-stat{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem}
+.results-stat-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
+.results-stat-val{font-family:var(--display);font-size:26px;font-weight:900}
+.results-msg{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+.replay-btn{width:100%;padding:13px;border:none;border-radius:var(--radius);
+  background:var(--ink);color:var(--bg);font-family:var(--display);font-size:16px;cursor:pointer;transition:all 0.15s}
+.replay-btn:hover{background:var(--accent)}
+
+/* Responsive */
+@media(max-width:500px){
+  .site-header{padding:1rem;flex-direction:column;align-items:flex-start;gap:4px}
+  .section{padding:0 1rem}
+  .nav-tabs{margin:0 1rem 1.5rem}
+  .q-main{font-size:48px}
+  .options-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <div>
+    <div class="site-title">Math <span>Master</span></div>
+    <div class="site-subtitle">Tables · Squares · Cubes</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('tables')">× Multiplication Tables</button>
+  <button class="nav-tab" onclick="showSection('powers')">² ³ Squares &amp; Cubes</button>
+</div>
+
+<!-- ════════════════════ TABLES SECTION ════════════════════ -->
+<div class="section active" id="sec-tables">
+
+  <div class="score-bar">
+    <div class="score-card"><div class="score-label">Score</div><div class="score-val" id="t-score" style="color:var(--accent)">0</div></div>
+    <div class="score-card"><div class="score-label">Streak 🔥</div><div class="score-val" id="t-streak" style="color:var(--accent2)">0</div></div>
+    <div class="score-card"><div class="score-label">Attempts</div><div class="score-val" id="t-attempts">0</div></div>
+  </div>
+
+  <!-- TABLE MODE PILLS -->
+  <div class="pill-row" id="t-pill-row">
+    <button class="pill active" onclick="setTableMode('fwd')">a × b = ?</button>
+    <button class="pill" onclick="setTableMode('rev')">? × ? = answer</button>
+    <button class="pill" onclick="setTableMode('mix')">Mixed</button>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="config-box">
+    <div class="config-title">Choose tables to practice</div>
+    <div class="table-chips" id="table-chips"></div>
+    <div class="chip-actions">
+      <button class="chip-btn" onclick="selectAllTables()">All (2–30)</button>
+      <button class="chip-btn" onclick="clearTables()">Clear</button>
+    </div>
+  </div>
+
+  <div class="config-box">
+    <div class="config-title">Multipliers to test</div>
+    <div class="multiplier-row">
+      <div class="mult-label">×</div>
+      <div class="mult-chips" id="mult-chips"></div>
+    </div>
+    <div class="chip-actions">
+      <button class="chip-btn" onclick="selectAllMults()">All (1–30)</button>
+      <button class="chip-btn" onclick="clearMults()">Clear</button>
+    </div>
+  </div>
+
+  <!-- TIMER CONFIG TABLES -->
+  <div class="timer-config">
+    <label class="timer-toggle">
+      <input type="checkbox" id="t-timer-on" onchange="toggleTimerUI('t')"> Enable Timer
+    </label>
+    <div class="timer-sec-wrap" id="t-timer-sec-wrap" style="opacity:0.4;pointer-events:none">
+      <span>⏱</span>
+      <input type="number" id="t-timer-secs" value="10" min="3" max="120">
+      <span>seconds per question</span>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="startTables()">Start Quiz →</button>
+
+  <div id="t-quiz-area">
+    <div class="not-started">Select tables above and hit <strong>Start Quiz</strong></div>
+  </div>
+
+  <!-- Reference -->
+  <div class="ref-section">
+    <button class="ref-toggle-btn" onclick="toggleRef('t-ref')">▼ Show / Hide Reference Tables</button>
+    <div class="ref-content" id="t-ref">
+      <div class="multi-ref" id="t-ref-tables"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════ POWERS SECTION ════════════════════ -->
+<div class="section" id="sec-powers">
+
+  <div class="score-bar">
+    <div class="score-card"><div class="score-label">Score</div><div class="score-val" id="p-score" style="color:var(--accent3)">0</div></div>
+    <div class="score-card"><div class="score-label">Streak 🔥</div><div class="score-val" id="p-streak" style="color:var(--accent2)">0</div></div>
+    <div class="score-card"><div class="score-label">Attempts</div><div class="score-val" id="p-attempts">0</div></div>
+  </div>
+
+  <!-- MODE PILLS -->
+  <div class="pill-row">
+    <button class="pill active" onclick="setPowerMode('sq_fwd')">n² → Answer</button>
+    <button class="pill" onclick="setPowerMode('sq_rev')">Answer → Which n²?</button>
+    <button class="pill" onclick="setPowerMode('cb_fwd')">n³ → Answer</button>
+    <button class="pill" onclick="setPowerMode('cb_rev')">Answer → Which n³?</button>
+    <button class="pill" onclick="setPowerMode('both_fwd')">Squares + Cubes</button>
+    <button class="pill" onclick="setPowerMode('full_mix')">Full Mix</button>
+  </div>
+
+  <!-- RANGE -->
+  <div class="config-box">
+    <div class="config-title">Number range</div>
+    <div class="range-row">
+      <span class="range-label">From</span>
+      <div class="range-input"><input type="number" id="p-from" value="1" min="1" max="50"> <span>to</span> <input type="number" id="p-to" value="30" min="1" max="50"></div>
+    </div>
+  <!-- TIMER CONFIG POWERS -->
+  <div class="timer-config">
+    <label class="timer-toggle">
+      <input type="checkbox" id="p-timer-on" onchange="toggleTimerUI('p')"> Enable Timer
+    </label>
+    <div class="timer-sec-wrap" id="p-timer-sec-wrap" style="opacity:0.4;pointer-events:none">
+      <span>⏱</span>
+      <input type="number" id="p-timer-secs" value="10" min="3" max="120">
+      <span>seconds per question</span>
+    </div>
+  </div>
+
+    <button class="start-btn" style="margin-bottom:0" onclick="startPowers()">Start Quiz →</button>
+  </div>
+
+  <div id="p-quiz-area" style="margin-top:1.25rem">
+    <div class="not-started">Choose a mode and hit <strong>Start Quiz</strong></div>
+  </div>
+
+  <!-- Reference -->
+  <div class="ref-section">
+    <button class="ref-toggle-btn" onclick="toggleRef('p-ref')">▼ Show / Hide Reference Table</button>
+    <div class="ref-content" id="p-ref">
+      <div class="ref-table-wrap">
+        <table class="ref-table" id="p-ref-table">
+          <tr><th>n</th><th>n²</th><th>n³</th></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <strong>Tip:</strong> Squares — n² means n×n &nbsp;|&nbsp; Cubes — n³ means n×n×n<br>
+    <strong>Trick:</strong> (a+1)² = a² + 2a + 1 &nbsp;(use previous square to find next!)
+  </div>
+
+</div>
+
+<script>
+/* ─── NAVIGATION ─── */
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ─── REFERENCE TOGGLE ─── */
+let refBuilt={};
+function toggleRef(id){
+  const el=document.getElementById(id);
+  if(el.style.display==='block'){el.style.display='none';return;}
+  el.style.display='block';
+  if(id==='t-ref') buildTableRef();
+  if(id==='p-ref') buildPowerRef();
+}
+
+/* ─── TIMER TOGGLE UI ─── */
+function toggleTimerUI(prefix){
+  const on=document.getElementById(prefix+'-timer-on').checked;
+  const wrap=document.getElementById(prefix+'-timer-sec-wrap');
+  wrap.style.opacity=on?'1':'0.4';
+  wrap.style.pointerEvents=on?'auto':'none';
+}
+
+/* ─── SHARED TIMER ENGINE ─── */
+let activeTimer=null;
+let timerRemaining=0, timerTotal=0;
+
+function startTimer(seconds, onTimeout, barId, labelId){
+  clearTimer();
+  timerTotal=seconds; timerRemaining=seconds;
+  const bar=document.getElementById(barId);
+  const lbl=document.getElementById(labelId);
+  if(bar) bar.style.width='100%';
+  if(lbl) lbl.innerHTML='<span>'+seconds+'</span>s left';
+
+  activeTimer=setInterval(()=>{
+    timerRemaining-=0.25;
+    const pct=Math.max(0,(timerRemaining/timerTotal)*100);
+    if(bar){
+      bar.style.width=pct+'%';
+      if(pct<30) bar.style.background='var(--wrong)';
+      else if(pct<60) bar.style.background='#e0a020';
+      else bar.style.background='var(--accent3)';
+    }
+    if(lbl) lbl.innerHTML='<span>'+Math.ceil(timerRemaining)+'</span>s left';
+    if(timerRemaining<=0){
+      clearTimer();
+      onTimeout();
+    }
+  },250);
+}
+
+function clearTimer(){
+  if(activeTimer){clearInterval(activeTimer);activeTimer=null;}
+}
+
+/* ══════════════════════════════════════════
+   TABLES QUIZ
+══════════════════════════════════════════ */
+let selectedTables=new Set([2,3,4,5]);
+let selectedMults=new Set([1,2,3,4,5,6,7,8,9,10]);
+let tScore=0,tStreak=0,tAttempts=0,tCorrect=0,tWrong=0,tTimeout=0;
+let tAnswered=false,tQuizActive=false;
+
+(function(){
+  const tc=document.getElementById('table-chips');
+  for(let i=2;i<=30;i++){
+    const b=document.createElement('button');
+    b.className='chip'+(selectedTables.has(i)?' selected':'');
+    b.textContent=i;b.dataset.n=i;
+    b.onclick=()=>toggleChip(b,i,selectedTables,'chip');
+    tc.appendChild(b);
+  }
+  const mc=document.getElementById('mult-chips');
+  for(let i=1;i<=30;i++){
+    const b=document.createElement('button');
+    b.className='mult-chip'+(selectedMults.has(i)?' selected':'');
+    b.textContent=i;b.dataset.n=i;
+    b.onclick=()=>toggleChip(b,i,selectedMults,'mult-chip');
+    mc.appendChild(b);
+  }
+})();
+
+function toggleChip(btn,n,set,cls){
+  if(set.has(n)){if(set.size>1){set.delete(n);btn.classList.remove('selected');}}
+  else{set.add(n);btn.classList.add('selected');}
+}
+function selectAllTables(){
+  selectedTables.clear();
+  document.querySelectorAll('#table-chips .chip').forEach(b=>{selectedTables.add(+b.dataset.n);b.classList.add('selected');});
+}
+function clearTables(){
+  const first=2;selectedTables.clear();selectedTables.add(first);
+  document.querySelectorAll('#table-chips .chip').forEach(b=>{b.classList.toggle('selected',+b.dataset.n===first);});
+}
+function selectAllMults(){
+  selectedMults.clear();
+  document.querySelectorAll('#mult-chips .mult-chip').forEach(b=>{selectedMults.add(+b.dataset.n);b.classList.add('selected');});
+}
+function clearMults(){
+  const first=1;selectedMults.clear();selectedMults.add(first);
+  document.querySelectorAll('#mult-chips .mult-chip').forEach(b=>{b.classList.toggle('selected',+b.dataset.n===first);});
+}
+
+let tTableMode = 'fwd';
+function setTableMode(m){
+  tTableMode = m;
+  document.querySelectorAll('#t-pill-row .pill').forEach(p=>{
+    p.classList.toggle('active', p.getAttribute('onclick').includes("'"+m+"'"));
+  });
+}
+
+function startTables(){
+  if(selectedTables.size===0||selectedMults.size===0){alert('Please select at least one table and one multiplier.');return;}
+  tScore=0;tStreak=0;tAttempts=0;tCorrect=0;tWrong=0;tTimeout=0;
+  ['t-score','t-streak','t-attempts'].forEach(id=>document.getElementById(id).textContent='0');
+  tQuizActive=true;
+  nextTQuestion();
+}
+
+let tTable,tMult,tAnswer,tQType,tCorrectPair;
+function nextTQuestion(){
+  clearTimer();
+  tAnswered=false;
+  const qa=document.getElementById('t-quiz-area');
+  qa.className='slide-in';
+
+  tTable=pick([...selectedTables]);
+  tMult=pick([...selectedMults]);
+  tAnswer=tTable*tMult;
+
+  // Decide question type
+  let qmode = tTableMode;
+  if(qmode==='mix') qmode = Math.random()<0.5 ? 'fwd' : 'rev';
+  tQType = qmode;
+
+  const timerOn=document.getElementById('t-timer-on').checked;
+  const timerSecs=Math.max(3,+document.getElementById('t-timer-secs').value||10);
+
+  let questionHTML = '';
+
+  if(tQType === 'fwd'){
+    // Forward: tTable × tMult = ?
+    const wrongs=new Set();
+    let att=0;
+    while(wrongs.size<3&&att<500){
+      att++;
+      const tenOff=(randInt(1,5)*(Math.random()<0.5?1:-1))*10;
+      const w=tAnswer+tenOff;
+      if(w!==tAnswer&&w>0) wrongs.add(w);
+    }
+    const lastD=tAnswer%10;
+    let fb=lastD===0?10:lastD;
+    while(wrongs.size<3){fb+=10;if(fb!==tAnswer)wrongs.add(fb);}
+    const opts=shuffle([tAnswer,...wrongs]);
+
+    questionHTML = `
+      <div class="question-card" data-num="${tTable}">
+        <div class="q-eyebrow">What is</div>
+        <div class="q-main">${tTable} × ${tMult}</div>
+        <div class="q-hint">Table of ${tTable}</div>
+      </div>
+      <div class="options-grid" id="t-opts">
+        ${opts.map(o=>`<button class="opt-btn" onclick="checkT(this,'${o}','${tAnswer}','fwd')">${o}</button>`).join('')}
+      </div>`;
+
+  } else {
+    // Reverse: ? × ? = tAnswer  → pick correct factor pair
+    tCorrectPair = [tTable, tMult];
+    const correctLabel = tTable + ' × ' + tMult;
+
+    // Generate 3 wrong factor pairs (plausible wrong products)
+    // Strategy: pick nearby products that are different numbers
+    const wrongPairs = [];
+    const usedProducts = new Set([tAnswer]);
+    let attempts = 0;
+    // Collect all valid pairs from selected tables×mults
+    const allPairs = [];
+    for(const t of selectedTables){
+      for(const m of selectedMults){
+        const prod = t*m;
+        if(prod !== tAnswer && !usedProducts.has(prod)){
+          allPairs.push([t, m, prod]);
+          usedProducts.add(prod);
+        }
+      }
+    }
+    // Sort by closeness to tAnswer
+    allPairs.sort((a,b)=>Math.abs(a[2]-tAnswer)-Math.abs(b[2]-tAnswer));
+    // Take 3 closest
+    for(let i=0;i<Math.min(3,allPairs.length);i++){
+      wrongPairs.push(allPairs[i]);
+    }
+    // If not enough from selected tables, generate random nearby ones
+    while(wrongPairs.length<3){
+      const rt = randInt(2,15);
+      const rm = randInt(2,15);
+      const rp = rt*rm;
+      if(!usedProducts.has(rp)){
+        usedProducts.add(rp);
+        wrongPairs.push([rt,rm,rp]);
+      }
+    }
+
+    const correctOpt = {label: tTable+' × '+tMult, val: 'correct'};
+    const wrongOpts = wrongPairs.slice(0,3).map(p=>({label: p[0]+' × '+p[1], val: p[0]+'x'+p[1]}));
+    const allOpts = shuffle([correctOpt, ...wrongOpts]);
+
+    questionHTML = `
+      <div class="question-card" data-num="${tTable}">
+        <div class="q-eyebrow">Which pair gives</div>
+        <div class="q-main">${tAnswer}</div>
+        <div class="q-hint">? × ? = ${tAnswer}</div>
+      </div>
+      <div class="options-grid" id="t-opts">
+        ${allOpts.map(o=>`<button class="opt-btn pair-opt t-rev-opt" onclick="checkT(this,'${o.val}','correct','rev')" data-val="${o.val}">${o.label}</button>`).join('')}
+      </div>`;
+  }
+
+  qa.innerHTML=`
+    ${timerOn?`<div class="timer-bar-wrap">
+      <div class="timer-bar-track"><div class="timer-bar-fill" id="t-bar" style="width:100%"></div></div>
+      <div class="timer-label" id="t-lbl"><span>${timerSecs}</span>s left</div>
+    </div>`:''}
+    ${questionHTML}
+    <div class="feedback" id="t-feedback"></div>
+    <button class="next-btn" id="t-next" onclick="nextTQuestion()">Next →</button>
+  `;
+
+  if(timerOn) startTimer(timerSecs, ()=>timeoutT(), 't-bar','t-lbl');
+}
+
+function timeoutT(){
+  if(tAnswered) return;
+  tAnswered=true; tAttempts++; tTimeout++;
+  if(tQType==='fwd'){
+    document.querySelectorAll('#t-opts .opt-btn').forEach(b=>{b.disabled=true;if(+b.textContent===tAnswer)b.classList.add('correct');});
+    document.getElementById('t-feedback').textContent='⏱ Time up! Answer: '+tAnswer;
+  } else {
+    document.querySelectorAll('#t-opts .opt-btn').forEach(b=>{b.disabled=true;if(b.dataset.val==='correct')b.classList.add('correct');});
+    document.getElementById('t-feedback').textContent='⏱ Time up! Answer: '+tTable+' × '+tMult;
+  }
+  tStreak=0;
+  document.getElementById('t-feedback').className='feedback bad';
+  document.getElementById('t-score').textContent=tScore;
+  document.getElementById('t-streak').textContent=tStreak;
+  document.getElementById('t-attempts').textContent=tAttempts;
+  document.getElementById('t-next').style.display='block';
+}
+
+function checkT(btn,val,correct,type){
+  if(tAnswered) return;
+  clearTimer();
+  tAnswered=true;tAttempts++;
+  document.querySelectorAll('#t-opts .opt-btn').forEach(b=>b.disabled=true);
+
+  if(type==='fwd'){
+    const isCorrect = (+val===tAnswer);
+    if(isCorrect){
+      btn.classList.add('correct');tScore++;tStreak++;tCorrect++;
+      showFB('t-feedback',true);
+    } else {
+      btn.classList.add('wrong');tStreak=0;tWrong++;
+      document.querySelectorAll('#t-opts .opt-btn').forEach(b=>{if(+b.textContent===tAnswer)b.classList.add('correct');});
+      showFB('t-feedback',false,tAnswer);
+    }
+  } else {
+    const isCorrect = (val==='correct');
+    if(isCorrect){
+      btn.classList.add('correct');tScore++;tStreak++;tCorrect++;
+      showFB('t-feedback',true);
+    } else {
+      btn.classList.add('wrong');tStreak=0;tWrong++;
+      document.querySelectorAll('#t-opts .t-rev-opt').forEach(b=>{if(b.dataset.val==='correct')b.classList.add('correct');});
+      showFB('t-feedback',false,tTable+' × '+tMult);
+    }
+  }
+  document.getElementById('t-score').textContent=tScore;
+  document.getElementById('t-streak').textContent=tStreak;
+  document.getElementById('t-attempts').textContent=tAttempts;
+  document.getElementById('t-next').style.display='block';
+}
+
+function buildTableRef(){
+  if(refBuilt['t']) return; refBuilt['t']=true;
+  const c=document.getElementById('t-ref-tables');
+  c.innerHTML='';
+  [...selectedTables].sort((a,b)=>a-b).forEach(t=>{
+    const div=document.createElement('div');
+    div.className='mini-table';
+    let rows='';
+    for(let i=1;i<=30;i++) rows+=`<tr><td>${t} × ${i}</td><td>= ${t*i}</td></tr>`;
+    div.innerHTML=`<div class="mini-table-title">Table of ${t}</div><table>${rows}</table>`;
+    c.appendChild(div);
+  });
+}
+
+/* ══════════════════════════════════════════
+   POWERS QUIZ
+══════════════════════════════════════════ */
+let pMode='sq_fwd',pScore=0,pStreak=0,pAttempts=0,pCorrect2=0,pWrong=0,pTimeout=0;
+let pAnswered=false;
+let pFrom=1,pTo=30,pCorrect;
+
+function setPowerMode(m){
+  pMode=m;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.getAttribute('onclick').includes("'"+m+"'")));
+}
+
+function startPowers(){
+  pFrom=Math.max(1,+document.getElementById('p-from').value||1);
+  pTo=Math.min(50,+document.getElementById('p-to').value||30);
+  if(pFrom>pTo){alert('From must be ≤ To');return;}
+  pScore=0;pStreak=0;pAttempts=0;pCorrect2=0;pWrong=0;pTimeout=0;
+  ['p-score','p-streak','p-attempts'].forEach(id=>document.getElementById(id).textContent='0');
+  nextPQuestion();
+}
+
+function nextPQuestion(){
+  clearTimer();
+  pAnswered=false;
+  const qa=document.getElementById('p-quiz-area');
+  qa.className='slide-in';
+
+  const n=randInt(pFrom,pTo);
+  let mode=pMode;
+  if(mode==='both_fwd') mode=Math.random()<0.5?'sq_fwd':'cb_fwd';
+  if(mode==='full_mix') mode=['sq_fwd','sq_rev','cb_fwd','cb_rev'][Math.floor(Math.random()*4)];
+
+  let eyebrow,qMain,hint,opts;
+
+  if(mode==='sq_fwd'){
+    pCorrect=n*n;
+    eyebrow='What is the square of';qMain=`${n}²`;hint=`(${n} × ${n})`;
+    opts=genNumOpts(pCorrect,1,pTo*pTo,true);
+  } else if(mode==='sq_rev'){
+    pCorrect=n;
+    const sq=n*n;
+    eyebrow='Square root — which number gives';qMain=`${sq}`;hint=`as a perfect square?`;
+    opts=genLetterOpts(pCorrect,pFrom,pTo);
+  } else if(mode==='cb_fwd'){
+    pCorrect=n*n*n;
+    eyebrow='What is the cube of';qMain=`${n}³`;hint=`(${n} × ${n} × ${n})`;
+    opts=genNumOpts(pCorrect,1,pTo*pTo*pTo,false);
+  } else {
+    pCorrect=n;
+    const cb=n*n*n;
+    eyebrow='Cube root — which number gives';qMain=`${cb}`;hint=`as a perfect cube?`;
+    opts=genLetterOpts(pCorrect,pFrom,pTo);
+  }
+
+  const timerOn=document.getElementById('p-timer-on').checked;
+  const timerSecs=Math.max(3,+document.getElementById('p-timer-secs').value||10);
+
+  qa.innerHTML=`
+    ${timerOn?`<div class="timer-bar-wrap">
+      <div class="timer-bar-track"><div class="timer-bar-fill" id="p-bar" style="width:100%"></div></div>
+      <div class="timer-label" id="p-lbl"><span>${timerSecs}</span>s left</div>
+    </div>`:''}
+    <div class="question-card" data-num="${n}">
+      <div class="q-eyebrow">${eyebrow}</div>
+      <div class="q-main" id="pq-main">${qMain}</div>
+      <div class="q-hint">${hint}</div>
+    </div>
+    <div class="options-grid" id="p-opts">
+      ${opts.map(o=>`<button class="opt-btn" onclick="checkP(this,${o})">${o}</button>`).join('')}
+    </div>
+    <div class="feedback" id="p-feedback"></div>
+    <button class="next-btn" id="p-next" onclick="nextPQuestion()">Next →</button>
+  `;
+
+  if(timerOn) startTimer(timerSecs, ()=>timeoutP(), 'p-bar','p-lbl');
+}
+
+function timeoutP(){
+  if(pAnswered) return;
+  pAnswered=true;pAttempts++;pTimeout++;
+  document.querySelectorAll('#p-opts .opt-btn').forEach(b=>{b.disabled=true;if(+b.textContent===pCorrect)b.classList.add('correct');});
+  pStreak=0;
+  document.getElementById('p-feedback').textContent='⏱ Time up! Answer: '+pCorrect;
+  document.getElementById('p-feedback').className='feedback bad';
+  document.getElementById('p-score').textContent=pScore;
+  document.getElementById('p-streak').textContent=pStreak;
+  document.getElementById('p-attempts').textContent=pAttempts;
+  document.getElementById('p-next').style.display='block';
+}
+
+function checkP(btn,val){
+  if(pAnswered) return;
+  clearTimer();
+  pAnswered=true;pAttempts++;
+  document.querySelectorAll('#p-opts .opt-btn').forEach(b=>b.disabled=true);
+  if(val===pCorrect){
+    btn.classList.add('correct');pScore++;pStreak++;pCorrect2++;
+    showFB('p-feedback',true);
+  } else {
+    btn.classList.add('wrong');pStreak=0;pWrong++;
+    document.querySelectorAll('#p-opts .opt-btn').forEach(b=>{if(+b.textContent===pCorrect)b.classList.add('correct');});
+    showFB('p-feedback',false,pCorrect);
+  }
+  document.getElementById('p-score').textContent=pScore;
+  document.getElementById('p-streak').textContent=pStreak;
+  document.getElementById('p-attempts').textContent=pAttempts;
+  document.getElementById('p-next').style.display='block';
+}
+
+function genNumOpts(correct,min,max,isSquare){
+  const wrongs=new Set();
+  const range=Math.max(60,Math.ceil(correct*0.3));
+  let attempts=0;
+  while(wrongs.size<3&&attempts<500){
+    attempts++;
+    const tenOff=(randInt(1,Math.ceil(range/10))*(Math.random()<0.5?1:-1))*10;
+    const w=correct+tenOff;
+    if(w!==correct&&w>0) wrongs.add(w);
+  }
+  const lastD=correct%10;
+  let fb=lastD===0?10:lastD;
+  while(wrongs.size<3){fb+=10;if(fb!==correct)wrongs.add(fb);}
+  return shuffle([correct,...wrongs]);
+}
+
+function genLetterOpts(correct,from,to){
+  const wrongs=new Set();
+  while(wrongs.size<3){
+    const r=randInt(from,to);
+    if(r!==correct) wrongs.add(r);
+  }
+  return shuffle([correct,...wrongs]);
+}
+
+let pRefBuilt=false;
+function buildPowerRef(){
+  if(pRefBuilt) return; pRefBuilt=true;
+  const tb=document.getElementById('p-ref-table');
+  for(let i=1;i<=50;i++){
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i}</td><td>${i*i}</td><td>${i*i*i}</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+/* ─── SHARED HELPERS ─── */
+function showFB(id,ok,correct){
+  const el=document.getElementById(id);
+  if(ok){
+    const msgs=['✓ Correct!','✓ Nailed it!','✓ Perfect!','✓ Spot on!','✓ Excellent!'];
+    el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    el.className='feedback ok';
+  } else {
+    el.textContent=`✗ Wrong! Answer is: ${correct}`;
+    el.className='feedback bad';
+  }
+}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+</script></html>
